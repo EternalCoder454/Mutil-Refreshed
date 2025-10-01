@@ -4,7 +4,69 @@ import net.minecraft.util.Mth;
 
 import java.awt.*;
 
-public class ColorHelper {
+public class SimpleColor {
+    protected final int color;
+
+    public SimpleColor(int color) {
+        this.color = color;
+    }
+
+    public int getRaw() {
+        return color;
+    }
+
+    public short getRedShort() {
+        return (short) ((color >> 16) & 0xFF);
+    }
+
+    public short getGreenShort() {
+        return (short) ((color >> 8) & 0xFF);
+    }
+
+    public short getBlueShort() {
+        return (short) (color & 0xFF);
+    }
+
+    public short getAlphaShort() {
+        return (short) ((color >> 24) & 0xFF);
+    }
+
+    public float getRedFloat() {
+        return ((color >> 16) & 0xFF) / 255f;
+    }
+
+    public float getGreenFloat() {
+        return ((color >> 8) & 0xFF) / 255f;
+    }
+
+    public float getBlueFloat() {
+        return (color & 0xFF) / 255f;
+    }
+
+    public float getAlphaFloat() {
+        return ((color >> 24) & 0xFF) / 255f;
+    }
+
+    public SimpleColor withSaturation(double saturation) {
+        return new SimpleColor(withSaturation(color, saturation));
+    }
+
+    public SimpleColor multiplyBrightness(double multiplier) {
+        return new SimpleColor(multiplyBrightness(color, multiplier));
+    }
+
+    public SimpleColor withBrightness(double brightness) {
+        return new SimpleColor(withBrightness(color, brightness));
+    }
+
+    public SimpleColor withAlpha(double alpha) {
+        return new SimpleColor(withAlpha(color, alpha));
+    }
+
+    public SimpleColor blend(SimpleColor other, float ratio) {
+        return new SimpleColor(blend(color, other.color, ratio));
+    }
+
     private static int withSaturation(int color, double saturation) {
         float[] hsl = new float[3];
         Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, hsl);
