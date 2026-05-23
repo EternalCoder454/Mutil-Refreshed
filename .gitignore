@@ -18,8 +18,7 @@ build
 .gradle
 
 # other
-eclipse
-run
+runs/
 logs/
 
 # Files from Forge MDK

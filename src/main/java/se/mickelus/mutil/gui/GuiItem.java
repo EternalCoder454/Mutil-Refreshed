@@ -109,7 +109,7 @@ public class GuiItem extends GuiElement {
     @Override
     public List<Component> getTooltipLines() {
         if (showTooltip && itemStack != null && hasFocus()) {
-            return new ArrayList<>(itemStack.getTooltipLines(Minecraft.getInstance().player,
+            return new ArrayList<>(itemStack.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.EMPTY, Minecraft.getInstance().player,
                     mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL));
         }
 
