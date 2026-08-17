@@ -1,6 +1,7 @@
 package se.mickelus.mutil.util;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -88,7 +89,7 @@ public class ItemHandlerWrapper implements Container {
     @Override
     public boolean stillValid(Player player) { return false; }
     @Override
-    public void startOpen(Player player) {}
+    public void startOpen(ContainerUser user) {}
     @Override
-    public void stopOpen(Player player) {}
+    public void stopOpen(ContainerUser user) {}
 }

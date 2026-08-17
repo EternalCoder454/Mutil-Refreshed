@@ -122,7 +122,7 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
         rawData = splashList;
 
         // PacketHandler dependencies get upset when called upon before the server has started properly
-        if (FMLLoader.getDist().isDedicatedServer() && ServerLifecycleHooks.getCurrentServer() != null) {
+        if (FMLLoader.getCurrent().getDist().isDedicatedServer() && ServerLifecycleHooks.getCurrentServer() != null) {
             syncronizer.sendToAll(directory, rawData);
         }
 

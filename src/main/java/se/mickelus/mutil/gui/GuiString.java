@@ -81,7 +81,6 @@ public class GuiString extends GuiElement {
     public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
         activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
         activeAnimations.forEach(KeyframeAnimation::preDraw);
-        RenderSystem.enableBlend();
         drawString(graphics, string, refX + x, refY + y, color, opacity * getOpacity(), drawShadow);
     }
 

@@ -1,6 +1,5 @@
 package se.mickelus.mutil.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -77,19 +76,14 @@ public class GuiItem extends GuiElement {
     public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
         super.draw(graphics, refX, refY, screenWidth, screenHeight, mouseX, mouseY, opacity);
         if (opacity * getOpacity() >= opacityThreshold) {
-            RenderSystem.applyModelViewMatrix();
-            RenderSystem.enableDepthTest();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            graphics.renderItem(itemStack, refX + x, refY + y);
+            graphics.item(itemStack, refX + x, refY + y);
 
             if (renderDecoration) {
 
             }
 
             if (resetDepthTest) {
-                RenderSystem.disableDepthTest();
-            }
+                    }
         }
     }
 

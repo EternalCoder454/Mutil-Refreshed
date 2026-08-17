@@ -11,7 +11,7 @@ public class GuiTextSmall extends GuiText {
     public void setString(String string) {
         this.string = string.replace("\\n", "\n");
 
-        height = fontRenderer.wordWrapHeight(this.string, width * 2) / 2;
+        height = fontRenderer.wordWrapHeight(net.minecraft.network.chat.Component.literal(this.string), width * 2) / 2;
     }
 
     @Override

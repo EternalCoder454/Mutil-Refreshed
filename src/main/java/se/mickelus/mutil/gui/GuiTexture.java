@@ -1,6 +1,6 @@
 package se.mickelus.mutil.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
@@ -61,8 +61,11 @@ public class GuiTexture extends GuiElement {
 
     protected void drawTexture(final GuiGraphicsExtractor graphics, Identifier textureLocation, int x, int y, int width, int height,
             int u, int v, int color, float opacity) {
-        RenderSystem.setShaderColor((color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f, opacity);
-        graphics.blit(textureLocation, x, y, u, v, width, height, textureWidth, textureHeight);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        // RenderSystem.setShaderColor is gone with the Blaze3D pipeline rewrite. The tint is not
+        // lost: blit carries an ARGB colour itself now, which is the same result without leaving
+        // global state set for whatever draws next.
+        int argb = (Math.round(opacity * 255) << 24) | (color & 0xFFFFFF);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, textureLocation, x, y, u, v, width, height,
+                textureWidth, textureHeight, argb);
     }
 }

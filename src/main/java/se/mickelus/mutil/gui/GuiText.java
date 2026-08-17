@@ -29,7 +29,7 @@ public class GuiText extends GuiElement {
     public void setString(String string) {
         this.string = string.replace("\\n", "\n");
 
-        height = fontRenderer.wordWrapHeight(this.string, width);
+        height = fontRenderer.wordWrapHeight(net.minecraft.network.chat.Component.literal(this.string), width);
     }
 
     public void setColor(int color) {

@@ -1,6 +1,6 @@
 # Mutil Refreshed, port status
 
-Port of mutil from 1.21.1 NeoForge to 26.1.2 NeoForge. In progress. Does not compile yet.
+Port of mutil from 1.21.1 NeoForge to 26.1.2 NeoForge. Compiles clean, jar builds, 0 errors.
 
 Base is upstream branch `1.21` at `fd5e8d5`, version 7.0.0-pre.0, which was already on 1.21.1
 NeoForge with ModDevGradle. That is a far shorter jump than the `1.20` branch.
@@ -13,7 +13,7 @@ NeoForge with ModDevGradle. That is a far shorter jump than the `1.20` branch.
 | After ResourceLocation to Identifier | 150 raw, 73 unique |
 | After byte buf, dist and event bus fixes | 140 raw, 68 unique |
 | After GuiGraphics and 2D matrix migration | 96 raw, 46 unique |
-| Now | 78 raw, 37 unique |
+| After the GUI, registry and network fixes | 0 |
 
 ## Done
 
@@ -42,29 +42,29 @@ API fixes:
   became `pushMatrix` and `popMatrix`. `translate` and `scale` lost their z argument.
 - `drawString` became `text`.
 
-## Left, 37 unique errors
+## Final fixes
 
-Grouped by what the work actually is.
+`GuiRootHud` places a GUI on a block face in world space. It used `GuiGraphics.pose()` when
+that was a 3D `PoseStack`. It now takes an explicit `PoseStack` parameter for placement and
+keeps the extractor for 2D drawing, because those are separate stacks in 26.1.
 
-**Two dimensional rotation, 15 errors in `gui/hud/GuiRootHud.java`.** Five `mulPose(Quaternionf)`
-calls. `Matrix3x2fStack` has no quaternion. 2D rotation is `rotate(float radians)`. Each site
-needs reading rather than renaming, because a quaternion around an arbitrary axis does not
-always reduce to a single 2D angle.
+`GuiTexture` tinted textures with `RenderSystem.setShaderColor`, which the Blaze3D pipeline
+rewrite removed. The tint is not lost. `blit` carries an ARGB colour itself now, which is the
+same result without leaving global state set for whatever draws next.
 
-**Item rendering, 7 errors in `gui/GuiItem.java`.** `renderItem` moved with the render state
-split.
+Other renames: `Direction.getNormal` to `getUnitVec3i`, `Registry.get` to `getValue`,
+`GuiGraphics.renderItem` to `item`, `renderTooltip` to `setTooltipForNextFrame`,
+`Font.wordWrapHeight` now takes `FormattedText`, `Container.startOpen` and `stopOpen` take a
+`ContainerUser`, `ItemParticleOption` takes an `Item`, and client to server sending moved from
+`PacketDistributor` to `ClientPacketDistributor`. `IClientMobEffectExtensions` takes an
+`AbstractContainerScreen`, not the old concrete inventory screen.
 
-**Tooltips, 3 errors in `effect/EffectTooltipRenderer.java`.** `renderTooltip` signature
-changed and `EffectRenderingInventoryScreen` moved.
+The Blaze3D immediate state calls, `enableBlend`, `enableDepthTest`, `disableDepthTest`,
+`applyModelViewMatrix` and `blendFuncSeparate`, have no replacement. Blending and depth are
+properties of the `RenderPipeline` a draw selects, so they are gone rather than moved.
 
-**Blaze3D, 4 errors.** `setShaderColor` and `GlStateManager.applyModelViewMatrix` are gone with
-the pipeline rewrite. Colour is now part of the draw call or the pipeline.
-
-**Blit, 2 errors in `gui/GuiTexture.java`.** `blit` takes a `RenderPipeline` as its first
-argument now.
-
-**Assorted, 6 errors.** Deserializers, `ItemHandlerWrapper`, `PacketHandler`, `ParticleHelper`,
-`DataStore`. Small and unrelated to each other.
+The jar now ships `LICENSE`. MIT requires the text to travel with the distribution and it was
+not being included.
 
 ## Watch out
 

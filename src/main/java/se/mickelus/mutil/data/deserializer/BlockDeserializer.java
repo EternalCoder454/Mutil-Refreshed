@@ -19,7 +19,7 @@ public class BlockDeserializer implements JsonDeserializer<Block> {
         if (string != null) {
             Identifier resourceLocation = Identifier.parse(string);
             if (BuiltInRegistries.BLOCK.containsKey(resourceLocation)) {
-                return BuiltInRegistries.BLOCK.get(resourceLocation);
+                return BuiltInRegistries.BLOCK.getValue(resourceLocation);
             }
         }
 

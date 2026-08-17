@@ -19,7 +19,7 @@ public class ItemDeserializer implements JsonDeserializer<Item> {
         if (string != null) {
             Identifier resourceLocation = Identifier.parse(string);
             if (BuiltInRegistries.ITEM.containsKey(resourceLocation)) {
-                return BuiltInRegistries.ITEM.get(resourceLocation);
+                return BuiltInRegistries.ITEM.getValue(resourceLocation);
             }
         }
 

@@ -158,6 +158,14 @@ publishing {
     }
 }
 
+// MIT requires the licence text to travel with the distribution, and the jar did not carry it.
+// Renamed so it cannot collide with a LICENSE from another mod once jars are merged.
+tasks.named('jar') {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
