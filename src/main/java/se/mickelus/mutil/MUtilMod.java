@@ -8,7 +8,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod(MUtilMod.MOD_ID)
-@EventBusSubscriber(modid = MUtilMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = MUtilMod.MOD_ID)
 public class MUtilMod {
     public static final String MOD_ID = "mutil";
 

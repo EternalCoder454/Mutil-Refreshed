@@ -2,7 +2,7 @@ package se.mickelus.mutil.gui.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
@@ -18,7 +18,7 @@ public class GuiRootHud extends GuiElement {
         super(0, 0, 0, 0);
     }
 
-    public void draw(GuiGraphics graphics, Vec3 proj, BlockHitResult rayTrace, VoxelShape shape) {
+    public void draw(GuiGraphicsExtractor graphics, Vec3 proj, BlockHitResult rayTrace, VoxelShape shape) {
         BlockPos blockPos = rayTrace.getBlockPos();
 
         Vec3 hitVec = rayTrace.getLocation();
@@ -28,13 +28,13 @@ public class GuiRootHud extends GuiElement {
                 rayTrace.getDirection(), shape.bounds());
     }
 
-    public void draw(GuiGraphics graphics, double x, double y, double z, double hitX, double hitY, double hitZ, Direction facing,
+    public void draw(GuiGraphicsExtractor graphics, double x, double y, double z, double hitX, double hitY, double hitZ, Direction facing,
             AABB boundingBox) {
         activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
         activeAnimations.forEach(KeyframeAnimation::preDraw);
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(x, y, z);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
 
         int mouseX = 0;
         int mouseY = 0;
@@ -53,7 +53,7 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxX - boundingBox.minX) * size);
                 height = (int) ((boundingBox.maxY - boundingBox.minY) * size);
 
-                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY, boundingBox.minZ);
+                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY);
                 graphics.pose().mulPose(Axis.YP.rotationDegrees(180));
                 break;
             case SOUTH:
@@ -63,7 +63,7 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxX - boundingBox.minX) * size);
                 height = (int) ((boundingBox.maxY - boundingBox.minY) * size);
 
-                graphics.pose().translate(boundingBox.minX, boundingBox.maxY, boundingBox.maxZ);
+                graphics.pose().translate(boundingBox.minX, boundingBox.maxY);
                 break;
             case EAST:
                 mouseX = (int) ( ( boundingBox.maxZ - hitZ ) * size );
@@ -72,7 +72,7 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxZ - boundingBox.minZ) * size);
                 height = (int) ((boundingBox.maxY - boundingBox.minY) * size);
 
-                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ);
+                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY);
                 graphics.pose().mulPose(Axis.YP.rotationDegrees(90));
                 break;
             case WEST:
@@ -82,7 +82,7 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxZ - boundingBox.minZ) * size);
                 height = (int) ((boundingBox.maxY - boundingBox.minY) * size);
 
-                graphics.pose().translate(boundingBox.minX, boundingBox.maxY, boundingBox.minZ);
+                graphics.pose().translate(boundingBox.minX, boundingBox.maxY);
                 graphics.pose().mulPose(Axis.YP.rotationDegrees(-90));
                 break;
             case UP:
@@ -92,9 +92,9 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxX - boundingBox.minX) * size);
                 height = (int) ((boundingBox.maxZ - boundingBox.minZ) * size);
 
-                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ);
+                graphics.pose().translate(boundingBox.maxX, boundingBox.maxY);
                 graphics.pose().mulPose(Axis.XP.rotationDegrees(90));
-                graphics.pose().scale(-1, 1, 1);
+                graphics.pose().scale(-1, 1);
                 break;
             case DOWN:
                 mouseX = (int) ( ( hitX - boundingBox.minX ) * size );
@@ -103,15 +103,15 @@ public class GuiRootHud extends GuiElement {
                 width = (int) ((boundingBox.maxX - boundingBox.minX) * size);
                 height = (int) ((boundingBox.maxZ - boundingBox.minZ) * size);
 
-                graphics.pose().translate(boundingBox.minX, boundingBox.minY, boundingBox.maxZ);
+                graphics.pose().translate(boundingBox.minX, boundingBox.minY);
                 graphics.pose().mulPose(Axis.XP.rotationDegrees(90));
                 break;
         }
 
-        graphics.pose().scale(1 / size, -1 / size, 1 / size);
-        graphics.pose().translate(0.0D, 0, 0.02);
+        graphics.pose().scale(1 / size, -1 / size);
+        graphics.pose().translate(0.0D, 0);
         updateFocusState(0, 0, mouseX, mouseY);
         drawChildren(graphics, 0, 0, width, height, mouseX, mouseY, 1);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }

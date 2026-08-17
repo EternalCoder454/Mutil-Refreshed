@@ -3,7 +3,7 @@ package se.mickelus.mutil.effect;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,7 +22,7 @@ public class EffectTooltipRenderer implements IClientMobEffectExtensions {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void renderInventoryEffectTooltip(GuiGraphics graphics, int x, int y, Supplier<Component> tooltip) {
+    public static void renderInventoryEffectTooltip(GuiGraphicsExtractor graphics, int x, int y, Supplier<Component> tooltip) {
         Minecraft mc = Minecraft.getInstance();
         Window window = mc.getWindow();
 
@@ -38,7 +38,7 @@ public class EffectTooltipRenderer implements IClientMobEffectExtensions {
 
     @Override
     public boolean renderInventoryIcon(final MobEffectInstance instance, final EffectRenderingInventoryScreen<?> screen,
-            final GuiGraphics graphics, final int x, final int y, final int blitOffset) {
+            final GuiGraphicsExtractor graphics, final int x, final int y, final int blitOffset) {
         renderInventoryEffectTooltip(graphics, x, y, () -> Component.literal(constructEffectTooltip.apply(instance)));
         return false;
     }

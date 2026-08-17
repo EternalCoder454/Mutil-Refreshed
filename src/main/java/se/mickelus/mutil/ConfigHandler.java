@@ -16,7 +16,7 @@ class ConfigHandler {
     static ModConfigSpec clientSpec;
 
     public static void setup(ModContainer container) {
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             setupClient();
             container.registerConfig(ModConfig.Type.CLIENT, clientSpec);
         }

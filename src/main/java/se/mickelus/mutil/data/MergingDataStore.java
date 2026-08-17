@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -31,18 +31,18 @@ public abstract class MergingDataStore<V, U> extends DataStore<V> {
     }
 
     @Override
-    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+    protected Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
         logger.debug("Reading data for {} data store...", directory);
-        Map<ResourceLocation, JsonElement> map = Maps.newHashMap();
+        Map<Identifier, JsonElement> map = Maps.newHashMap();
         int i = this.directory.length() + 1;
 
-        for (Map.Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(directory, rl -> rl.getPath().endsWith(".json")).entrySet()) {
+        for (Map.Entry<Identifier, List<Resource>> entry : resourceManager.listResourceStacks(directory, rl -> rl.getPath().endsWith(".json")).entrySet()) {
             if (!namespace.equals(entry.getKey().getNamespace())) {
                 continue;
             }
 
             String path = entry.getKey().getPath();
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(entry.getKey().getNamespace(), path.substring(i, path.length() - jsonExtLength));
+            Identifier location = Identifier.fromNamespaceAndPath(entry.getKey().getNamespace(), path.substring(i, path.length() - jsonExtLength));
 
             JsonArray allResources = new JsonArray();
 
@@ -75,8 +75,8 @@ public abstract class MergingDataStore<V, U> extends DataStore<V> {
     }
 
     @Override
-    public void loadFromPacket(Map<ResourceLocation, String> data) {
-        Map<ResourceLocation, JsonElement> splashList = data.entrySet().stream()
+    public void loadFromPacket(Map<Identifier, String> data) {
+        Map<Identifier, JsonElement> splashList = data.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> GsonHelper.fromJson(gson, entry.getValue(), JsonArray.class)
@@ -85,7 +85,7 @@ public abstract class MergingDataStore<V, U> extends DataStore<V> {
         parseData(splashList);
     }
 
-    public void parseData(Map<ResourceLocation, JsonElement> splashList) {
+    public void parseData(Map<Identifier, JsonElement> splashList) {
         logger.info("Loaded {} {}", String.format("%3d", splashList.values().size()), directory);
         dataMap = splashList.entrySet().stream()
                 .collect(Collectors.toMap(

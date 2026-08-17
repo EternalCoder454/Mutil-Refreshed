@@ -1,6 +1,6 @@
 package se.mickelus.mutil.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class GuiTextSmall extends GuiText {
 
@@ -15,11 +15,11 @@ public class GuiTextSmall extends GuiText {
     }
 
     @Override
-    public void draw(final GuiGraphics graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
-        graphics.pose().pushPose();
-        graphics.pose().scale(.5f, .5f, .5f);
+    public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(.5f, .5f);
         renderText(graphics, fontRenderer, string, (refX + x) * 2, (refY + y) * 2, width * 2, 0xffffff, opacity);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
 
         drawChildren(graphics, refX + x, refY + y, screenWidth, screenHeight, mouseX, mouseY, opacity * this.opacity);
     }

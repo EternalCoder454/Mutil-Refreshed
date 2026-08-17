@@ -1,6 +1,6 @@
 package se.mickelus.mutil.gui.impl;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import se.mickelus.mutil.gui.GuiElement;
 
 public class GuiHorizontalLayoutGroup extends GuiElement {
@@ -42,7 +42,7 @@ public class GuiHorizontalLayoutGroup extends GuiElement {
     }
 
     @Override
-    protected void drawChildren(final GuiGraphics graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
+    protected void drawChildren(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
         if (needsLayout) {
             layoutChildren();
         }

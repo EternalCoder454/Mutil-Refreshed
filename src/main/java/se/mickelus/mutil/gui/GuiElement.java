@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import se.mickelus.mutil.gui.animation.KeyframeAnimation;
 
-// todo 1.20: GuiComponent became GuiGraphics extension no longer makes sense, still works?
+// todo 1.20: GuiComponent became GuiGraphicsExtractor extension no longer makes sense, still works?
 public class GuiElement {
     protected int x;
     protected int y;
@@ -44,7 +44,7 @@ public class GuiElement {
         activeAnimations = new HashSet<>();
     }
 
-    public void draw(final GuiGraphics graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
+    public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
             float opacity) {
         drawChildren(graphics, refX + x, refY + y, screenWidth, screenHeight, mouseX, mouseY, opacity * this.opacity);
     }
@@ -57,7 +57,7 @@ public class GuiElement {
         activeAnimations.forEach(KeyframeAnimation::preDraw);
     }
 
-    protected void drawChildren(final GuiGraphics graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
+    protected void drawChildren(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
             float opacity) {
         elements.removeIf(GuiElement::shouldRemove);
         elements.stream()
@@ -371,7 +371,7 @@ public class GuiElement {
         return null;
     }
 
-    protected static void drawRect(final GuiGraphics graphics, int left, int top, int right, int bottom, int color, float opacity) {
+    protected static void drawRect(final GuiGraphicsExtractor graphics, int left, int top, int right, int bottom, int color, float opacity) {
         graphics.fill(left, top, right, bottom, colorWithOpacity(color, opacity));
     }
 

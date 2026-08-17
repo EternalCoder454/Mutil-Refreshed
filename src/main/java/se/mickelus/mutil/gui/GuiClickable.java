@@ -1,6 +1,6 @@
 package se.mickelus.mutil.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class GuiClickable extends GuiElement {
 
@@ -13,7 +13,7 @@ public class GuiClickable extends GuiElement {
     }
 
     @Override
-    public void draw(final GuiGraphics graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
+    public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY, float opacity) {
         super.draw(graphics, refX, refY, screenWidth, screenHeight, mouseX, mouseY, opacity);
     }
 
