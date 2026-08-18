@@ -2,7 +2,7 @@ package se.mickelus.mutil.gui;
 
 import net.minecraft.util.Mth;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class SimpleColor {
     protected final int color;

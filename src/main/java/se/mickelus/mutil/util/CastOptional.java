@@ -7,8 +7,6 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 public class CastOptional {
     public static <T> Optional<T> cast(@Nullable Object object, Class<T> clazz) {
-        return Optional.ofNullable(object)
-                .filter(clazz::isInstance)
-                .map(clazz::cast);
+        return clazz.isInstance(object) ? Optional.of(clazz.cast(object)) : Optional.empty();
     }
 }

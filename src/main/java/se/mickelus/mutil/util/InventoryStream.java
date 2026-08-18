@@ -4,26 +4,16 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.function.Consumer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @ParametersAreNonnullByDefault
 public class InventoryStream {
+    /**
+     * The stacks of a container, in slot order. Lazy, so a short circuiting operation stops reading
+     * slots as soon as it has its answer.
+     */
     public static Stream<ItemStack> of(Container inventory) {
-        return StreamSupport.stream(new Spliterators.AbstractSpliterator<ItemStack>(inventory.getContainerSize(), Spliterator.NONNULL | Spliterator.SIZED) {
-            int index = 0;
-
-            public boolean tryAdvance(Consumer<? super ItemStack> consumer) {
-                if (index < inventory.getContainerSize()) {
-                    consumer.accept(inventory.getItem(index++));
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }, false);
+        return IntStream.range(0, inventory.getContainerSize()).mapToObj(inventory::getItem);
     }
 }

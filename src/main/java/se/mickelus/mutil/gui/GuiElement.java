@@ -11,7 +11,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import se.mickelus.mutil.gui.animation.KeyframeAnimation;
 
-// todo 1.20: GuiComponent became GuiGraphicsExtractor extension no longer makes sense, still works?
+/**
+ * Base of the gui toolkit. Every element draws its children, so the methods here run once per
+ * element per frame and are written as loops rather than streams for that reason.
+ */
 public class GuiElement {
     protected int x;
     protected int y;
@@ -50,9 +53,6 @@ public class GuiElement {
     }
 
     public void updateAnimations() {
-        //        activeAnimations.stream()
-        //                .filter(animation -> !animation.isActive())
-        //                .forEach(KeyframeAnimation::stop);
         activeAnimations.removeIf(animation -> !animation.isActive());
         activeAnimations.forEach(KeyframeAnimation::preDraw);
     }
@@ -60,51 +60,39 @@ public class GuiElement {
     protected void drawChildren(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
             float opacity) {
         elements.removeIf(GuiElement::shouldRemove);
-        elements.stream()
-                .filter(GuiElement::isVisible)
-                .forEach((element -> {
-                    element.updateAnimations();
-                    element.draw(
-                            graphics, refX + getXOffset(this, element.attachmentAnchor) - getXOffset(element, element.attachmentPoint),
-                            refY + getYOffset(this, element.attachmentAnchor) - getYOffset(element, element.attachmentPoint),
-                            screenWidth, screenHeight, mouseX, mouseY, opacity);
-                }));
+
+        // Indexed rather than a stream. This is the innermost thing the toolkit does, once per
+        // element per frame, and the pipeline allocated a spliterator and a capturing lambda each
+        // time. Re-reading size each step also means an element added while drawing is handled
+        // rather than throwing.
+        for (int i = 0; i < elements.size(); i++) {
+            GuiElement element = elements.get(i);
+            if (!element.isVisible()) {
+                continue;
+            }
+
+            element.updateAnimations();
+            element.draw(
+                    graphics, refX + getXOffset(this, element.attachmentAnchor) - getXOffset(element, element.attachmentPoint),
+                    refY + getYOffset(this, element.attachmentAnchor) - getYOffset(element, element.attachmentPoint),
+                    screenWidth, screenHeight, mouseX, mouseY, opacity);
+        }
     }
 
     protected static int getXOffset(GuiElement element, GuiAttachment attachment) {
-        switch (attachment) {
-            case topLeft:
-            case middleLeft:
-            case bottomLeft:
-                return 0;
-            case topCenter:
-            case middleCenter:
-            case bottomCenter:
-                return element.getWidth() / 2;
-            case topRight:
-            case middleRight:
-            case bottomRight:
-                return element.getWidth();
-        }
-        return 0;
+        return switch (attachment) {
+            case topLeft, middleLeft, bottomLeft -> 0;
+            case topCenter, middleCenter, bottomCenter -> element.getWidth() / 2;
+            case topRight, middleRight, bottomRight -> element.getWidth();
+        };
     }
 
     protected static int getYOffset(GuiElement element, GuiAttachment attachment) {
-        switch (attachment) {
-            case topLeft:
-            case topCenter:
-            case topRight:
-                return 0;
-            case middleLeft:
-            case middleCenter:
-            case middleRight:
-                return element.getHeight() / 2;
-            case bottomCenter:
-            case bottomLeft:
-            case bottomRight:
-                return element.getHeight();
-        }
-        return 0;
+        return switch (attachment) {
+            case topLeft, topCenter, topRight -> 0;
+            case middleLeft, middleCenter, middleRight -> element.getHeight() / 2;
+            case bottomLeft, bottomCenter, bottomRight -> element.getHeight();
+        };
     }
 
     public boolean onMouseClick(int x, int y, int button) {
@@ -120,7 +108,9 @@ public class GuiElement {
     }
 
     public void onMouseRelease(int x, int y, int button) {
-        elements.forEach(element -> element.onMouseRelease(x, y, button));
+        for (int i = 0; i < elements.size(); i++) {
+            elements.get(i).onMouseRelease(x, y, button);
+        }
     }
 
     public boolean onMouseScroll(double mouseX, double mouseY, double distance) {
@@ -172,12 +162,18 @@ public class GuiElement {
     }
 
     public void updateFocusState(int refX, int refY, int mouseX, int mouseY) {
-        elements.stream()
-                .filter(GuiElement::isVisible)
-                .forEach(element -> element.updateFocusState(
-                        refX + x + getXOffset(this, element.attachmentAnchor) - getXOffset(element, element.attachmentPoint),
-                        refY + y + getYOffset(this, element.attachmentAnchor) - getYOffset(element, element.attachmentPoint),
-                        mouseX, mouseY));
+        // Runs every frame alongside the draw, so the same reasoning applies.
+        for (int i = 0; i < elements.size(); i++) {
+            GuiElement element = elements.get(i);
+            if (!element.isVisible()) {
+                continue;
+            }
+
+            element.updateFocusState(
+                    refX + x + getXOffset(this, element.attachmentAnchor) - getXOffset(element, element.attachmentPoint),
+                    refY + y + getYOffset(this, element.attachmentAnchor) - getYOffset(element, element.attachmentPoint),
+                    mouseX, mouseY);
+        }
 
         boolean gainFocus = mouseX >= getX() + refX
                 && mouseX < getX() + refX + getWidth()
@@ -360,14 +356,21 @@ public class GuiElement {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * The first tooltip any child offers, or null. Asked every frame while a screen is open.
+     */
     public List<Component> getTooltipLines() {
-        if (isVisible()) {
-            return elements.stream()
-                    .map(GuiElement::getTooltipLines)
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .orElse(null);
+        if (!isVisible()) {
+            return null;
         }
+
+        for (int i = 0; i < elements.size(); i++) {
+            List<Component> lines = elements.get(i).getTooltipLines();
+            if (lines != null) {
+                return lines;
+            }
+        }
+
         return null;
     }
 

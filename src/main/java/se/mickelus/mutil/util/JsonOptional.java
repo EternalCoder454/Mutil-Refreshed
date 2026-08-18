@@ -9,10 +9,6 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 public class JsonOptional {
     public static Optional<JsonElement> field(JsonObject object, String field) {
-        if (object.has(field)) {
-            return Optional.of(object.get(field));
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(object.get(field));
     }
 }

@@ -2,7 +2,6 @@ package se.mickelus.mutil.gui.animation;
 
 import se.mickelus.mutil.gui.GuiElement;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class KeyframeAnimation implements GuiAnimation {
@@ -25,7 +24,9 @@ public class KeyframeAnimation implements GuiAnimation {
 
     public KeyframeAnimation applyTo(Applier... appliers) {
         this.appliers = appliers;
-        Arrays.stream(this.appliers).forEach(applier -> applier.setElement(element));
+        for (Applier applier : this.appliers) {
+            applier.setElement(element);
+        }
         return this;
     }
 
@@ -42,7 +43,9 @@ public class KeyframeAnimation implements GuiAnimation {
     public void start() {
         startTime = System.currentTimeMillis();
 
-        Arrays.stream(this.appliers).forEach(applier -> applier.start(duration));
+        for (Applier applier : this.appliers) {
+            applier.start(duration);
+        }
 
         isActive = true;
         element.addAnimation(this);
@@ -61,9 +64,14 @@ public class KeyframeAnimation implements GuiAnimation {
         if (startTime + delay < currentTime) {
             if (startTime + delay + duration > currentTime) {
                 float progress = (currentTime - delay - startTime) * 1f / duration;
-                Arrays.stream(appliers).forEach(applier -> applier.preDraw(progress));
+                // Every frame, for every running animation, so no stream and no capture.
+                for (Applier applier : appliers) {
+                    applier.preDraw(progress);
+                }
             } else {
-                Arrays.stream(appliers).forEach(applier -> applier.preDraw(1));
+                for (Applier applier : appliers) {
+                    applier.preDraw(1);
+                }
                 isActive = false;
                 stop();
             }
