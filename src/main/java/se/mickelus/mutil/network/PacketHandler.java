@@ -84,7 +84,10 @@ public class PacketHandler {
                     return packet;
                 }
         );
-        registrar.playBidirectional(reg.type(), codec, this::onMessage);
+        // The single handler overload leaves the clientbound direction without one, which NeoForge
+        // rejects at load with "clientbound payloads are missing client-side handlers". Both
+        // directions get the same handler, which is what a bidirectional packet wanted all along.
+        registrar.playBidirectional(reg.type(), codec, this::onMessage, this::onMessage);
     }
 
     private <T extends AbstractPacket> void onMessage(T message, IPayloadContext ctx) {
