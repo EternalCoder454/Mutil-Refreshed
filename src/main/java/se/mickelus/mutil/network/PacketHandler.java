@@ -28,10 +28,12 @@ import java.util.function.Supplier;
 public class PacketHandler {
     private static final Logger logger = LogManager.getLogger();
 
+    private final String namespace;
     private final String version;
     private final ArrayList<PacketRegistration<? extends AbstractPacket>> registrations = new ArrayList<>();
 
     public PacketHandler(String namespace, String channelId, String protocolVersion) {
+        this.namespace = namespace;
         this.version = protocolVersion;
     }
 
@@ -56,6 +58,7 @@ public class PacketHandler {
             }
         }
 
+        AbstractPacket.assignType(packetClass, namespace);
         registrations.add(new PacketRegistration<>(packetClass, supplier));
         return true;
     }
