@@ -51,6 +51,14 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
         listeners = new LinkedList<>();
     }
 
+    /**
+     * The reload listener events take a name for each listener now and sort on it, so a store has to
+     * be able to say what it is called. Namespace and directory already identify it uniquely.
+     */
+    public Identifier getListenerId() {
+        return Identifier.fromNamespaceAndPath(namespace, directory);
+    }
+
     protected Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
         logger.debug("Reading data for {} data store...", directory);
         Map<Identifier, JsonElement> map = Maps.newHashMap();
