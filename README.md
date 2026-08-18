@@ -10,7 +10,7 @@ something else needs it, usually Tetra.
 
 Written by Mickelus. Copyright 2018 Mikael Eriksson Vikner. MIT.
 
-The only thing credited to this repository is the 26.1.2 NeoForge port. Authorship, design and
+The only thing credited to this repository is the 26.1.2 NeoForge port, by EternalHell. Authorship, design and
 every line of the original are his.
 
 ## Install
