@@ -1,6 +1,5 @@
 package se.mickelus.mutil.network;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -94,11 +92,6 @@ public class PacketHandler {
         ctx.enqueueWork(() -> message.handle(ctx.player()));
     }
 
-    @OnlyIn(Dist.CLIENT)
-    private Player getClientPlayer() {
-        return Minecraft.getInstance().player;
-    }
-
     public void sendTo(AbstractPacket message, ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, message);
     }
@@ -116,11 +109,12 @@ public class PacketHandler {
         sendToAllPlayersNear(message, level, pos.getX(), pos.getY(), pos.getZ(), radius);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    /**
+     * The client lookup lives in ClientPacketSender so that this class, which the dedicated server
+     * has to load, carries no reference to Minecraft.
+     */
     public void sendToServer(AbstractPacket message) {
-        if (Minecraft.getInstance().getConnection() != null) {
-            ClientPacketDistributor.sendToServer(message);
-        }
+        ClientPacketSender.sendToServer(message);
     }
 
     /**
