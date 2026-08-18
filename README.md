@@ -34,10 +34,19 @@ $env:TMP="C:\gtmp"; $env:TEMP="C:\gtmp"
 
 Output is `build\libs\mutil-26.1.2-7.0.0-pre.0.jar`.
 
-## Porting notes
+## Documentation
 
-`PORT-STATUS.md` records what changed between 1.21.1 and 26.1.2, why, and the one behaviour
-risk that does not surface as a compile error.
+| File | Covers |
+|---|---|
+| [DEV.md](DEV.md) | building, publishing, and what each of the five packages gives a consumer |
+| [PORT-STATUS.md](PORT-STATUS.md) | the 1.21.1 to 26.1.2 port, and the one behaviour risk that never surfaces as a compile error |
+| [CHANGELOG.md](CHANGELOG.md) | what changed, per release |
+| [PLAYTESTING.md](PLAYTESTING.md) | what to check before calling a build good |
+
+**Publish after every change.** Tetra resolves mutil by maven coordinate, so rebuilding without
+`publishToMavenLocal` leaves the consumer on the previous jar and the change never appears.
+
+## Porting notes
 
 Upstream stays on the `upstream` remote. Rebasing onto a newer upstream branch is the intended
 way to take future changes, not copying files.
