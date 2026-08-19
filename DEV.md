@@ -35,7 +35,7 @@ Tetra's `mutil_version` names.
 | Package | Classes | What it is |
 |---|---|---|
 | `gui` | 30 | the gui toolkit, an element tree drawn onto the extract and submit pipeline |
-| `util` | 9 | small helpers, optionals, casts, inventory streams, particles, rotation |
+| `util` | 10 | small helpers, optionals, casts, inventory streams, particles, rotation, resource handlers |
 | `data` | 4 | datapack backed stores that reload and sync themselves |
 | `network` | 4 | packets and the channel that carries them |
 | `scheduling` | 3 | run something later, on the right side |
@@ -48,13 +48,6 @@ constructor takes the gson, the namespace, the directory, the class to parse int
 `DataDistributor` for syncing to clients.
 
 ## What is still owed
-
-**`IItemHandler` is deprecated and marked for removal**, in favour of
-`ResourceHandler<ItemResource>` in `net.neoforged.neoforge.transfer`. Thirteen uses here, all in
-`util/ItemHandlerWrapper` and `gui/impl/ToggleableSlot`, and five files in Tetra touch those. It
-still compiles and still works, and it has a deadline that is not this version. `IItemHandler.of`
-adapts a resource handler, so the migration can be taken from either end. This is the only piece of
-the foundation with an expiry date on it.
 
 **Three `this-escape` warnings**, in `GuiButton`, `GuiItem` and `GuiText`. Each calls an
 overridable method from its own constructor, so a subclass sees itself half built. Nothing subclasses
