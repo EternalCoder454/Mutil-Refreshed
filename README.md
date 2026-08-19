@@ -1,19 +1,22 @@
 # Mutil Refreshed
 
-A library mod. Helpers for data management, networking and GUI setup. Formerly mgui.
+A library that other mods are built on. It does nothing on its own, and you have it because
+something else asked for it, usually Tetra.
 
-Mutil Refreshed is the Minecraft 26.1.2 NeoForge port of [mutil](https://github.com/mickelus/mutil)
-by Mickelus. Same mod, newer Minecraft. It does nothing on its own and is installed because
-something else needs it, usually Tetra.
+![Minecraft](https://img.shields.io/badge/minecraft-26.1.2-brightgreen.svg)
+![Loader](https://img.shields.io/badge/loader-NeoForge-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Credit
+## 📚 About
 
-Written by Mickelus. Copyright 2018 Mikael Eriksson Vikner. MIT.
+Helpers for data management, networking and GUI setup, formerly known as mgui.
 
-The only thing credited to this repository is the 26.1.2 NeoForge port, by EternalHell. Authorship, design and
-every line of the original are his.
+Mutil Refreshed is the Minecraft 26.1.2 NeoForge port of
+[mutil](https://github.com/mickelus/mutil) by Mickelus. Same mod, newer Minecraft.
 
-## Install
+## 📦 Installing
+
+Drop `mutil-*.jar` into `mods/`. Nothing else is required.
 
 | Thing | Value |
 |---|---|
@@ -22,19 +25,29 @@ every line of the original are his.
 | Java | 25 |
 | Mod id | `mutil` |
 
-The mod id stays `mutil` on purpose. Dependents resolve it by id, so renaming it would break
-every mod that asks for it. Only the display name is rebranded.
+The mod id stays `mutil` on purpose. Dependents resolve it by id, so renaming it would break every
+mod that asks for it. Only the display name is rebranded.
 
-## Build
+## 🩹 If something goes wrong
 
-```powershell
-$env:TMP="C:\gtmp"; $env:TEMP="C:\gtmp"
-.\gradlew.bat build
-```
+A mod that needs mutil and cannot find it fails at load with a missing dependency naming `mutil`.
+Check that the jar is in `mods/` and that its version satisfies what the dependent asked for.
 
-Output is `build\libs\mutil-26.1.2-7.0.0-pre.0.jar`.
+If you build from source, publish after every change. Tetra resolves mutil by maven coordinate, so
+rebuilding without `publishToMavenLocal` leaves the consumer on the previous jar and your change
+never appears.
 
-## Documentation
+## 📝 Credit
+
+Written by **Mickelus**. Copyright 2018 Mikael Eriksson Vikner. MIT.
+
+The only thing credited to this repository is the 26.1.2 NeoForge port, by **EternalHell**.
+Authorship, design and every line of the original are his.
+
+Upstream stays on the `upstream` remote. Rebasing onto a newer upstream branch is the intended way
+to take future changes, not copying files.
+
+## 💻 For developers
 
 | File | Covers |
 |---|---|
@@ -42,11 +55,3 @@ Output is `build\libs\mutil-26.1.2-7.0.0-pre.0.jar`.
 | [PORT-STATUS.md](PORT-STATUS.md) | the 1.21.1 to 26.1.2 port, and the one behaviour risk that never surfaces as a compile error |
 | [CHANGELOG.md](CHANGELOG.md) | what changed, per release |
 | [PLAYTESTING.md](PLAYTESTING.md) | what to check before calling a build good |
-
-**Publish after every change.** Tetra resolves mutil by maven coordinate, so rebuilding without
-`publishToMavenLocal` leaves the consumer on the previous jar and the change never appears.
-
-## Porting notes
-
-Upstream stays on the `upstream` remote. Rebasing onto a newer upstream branch is the intended
-way to take future changes, not copying files.
