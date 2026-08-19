@@ -3,6 +3,8 @@ package se.mickelus.mutil.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import se.mickelus.mutil.gui.animation.KeyframeAnimation;
 
 public class GuiString extends GuiElement {
@@ -78,6 +80,26 @@ public class GuiString extends GuiElement {
         activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
         activeAnimations.forEach(KeyframeAnimation::preDraw);
         drawString(graphics, string, refX + x, refY + y, color, opacity * getOpacity(), drawShadow);
+    }
+
+    /**
+     * Font.drawInBatch is the world space counterpart of the screen text call. It takes a matrix
+     * and a buffer source rather than writing into the gui render state, which is exactly the
+     * difference that stopped this drawing on a block face.
+     */
+    @Override
+    public void drawWorld(final PoseStack pose, final MultiBufferSource buffers, int refX, int refY, float opacity, int light) {
+        activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
+        activeAnimations.forEach(KeyframeAnimation::preDraw);
+
+        int argb = colorWithOpacity(color, opacity * getOpacity());
+        // The vanilla font flips a nearly transparent colour back to opaque, same guard as on screen.
+        if ((argb & -67108864) == 0) {
+            return;
+        }
+
+        fontRenderer.drawInBatch(string, refX + x, refY + y, argb, drawShadow, pose.last().pose(), buffers,
+                Font.DisplayMode.NORMAL, 0, light);
     }
 
     protected void drawString(final GuiGraphicsExtractor graphics, String text, int x, int y, int color, float opacity, boolean drawShadow) {

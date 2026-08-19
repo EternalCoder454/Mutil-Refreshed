@@ -9,10 +9,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.renderer.MultiBufferSource;
 import se.mickelus.mutil.gui.GuiElement;
 import se.mickelus.mutil.gui.animation.KeyframeAnimation;
 
 public class GuiRootHud extends GuiElement {
+
+    // Full block and sky light packed together, 0xF000F0. Written out because the constant
+    // that held it is not where it was, and Tetra's own renderers use the literal too.
+    private static final int fullBright = 15728880;
 
     public GuiRootHud() {
         super(0, 0, 0, 0);
@@ -28,11 +33,17 @@ public class GuiRootHud extends GuiElement {
                 rayTrace.getDirection(), shape.bounds());
     }
 
-    public void draw(GuiGraphicsExtractor graphics, PoseStack pose, double x, double y, double z, double hitX, double hitY, double hitZ, Direction facing,
-            AABB boundingBox) {
-        activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
-        activeAnimations.forEach(KeyframeAnimation::preDraw);
-
+    /**
+     * Put the pose on the block face and size this element to it.
+     *
+     * Both draw paths need exactly this, and the screen one had it inline. Shared rather than
+     * copied, because two versions of a transform this fiddly would drift the first time one of
+     * them was touched.
+     *
+     * {@return where on the face the cursor is, in this element's own coordinates}
+     */
+    protected int[] positionOnFace(PoseStack pose, double x, double y, double z, double hitX, double hitY, double hitZ,
+            Direction facing, AABB boundingBox) {
         pose.pushPose();
         pose.translate(x, y, z);
 
@@ -110,8 +121,42 @@ public class GuiRootHud extends GuiElement {
 
         pose.scale(1 / size, -1 / size, 1 / size);
         pose.translate(0.0D, 0, 0.02);
-        updateFocusState(0, 0, mouseX, mouseY);
-        drawChildren(graphics, 0, 0, width, height, mouseX, mouseY, 1);
+        return new int[]{mouseX, mouseY};
+    }
+
+    public void draw(GuiGraphicsExtractor graphics, PoseStack pose, double x, double y, double z, double hitX, double hitY, double hitZ,
+            Direction facing, AABB boundingBox) {
+        activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
+        activeAnimations.forEach(KeyframeAnimation::preDraw);
+
+        int[] mouse = positionOnFace(pose, x, y, z, hitX, hitY, hitZ, facing, boundingBox);
+        updateFocusState(0, 0, mouse[0], mouse[1]);
+        drawChildren(graphics, 0, 0, width, height, mouse[0], mouse[1], 1);
+        pose.popPose();
+    }
+
+    /**
+     * The same overlay, drawn onto the block face in the world.
+     *
+     * A block outline renderer hands over a pose and a buffer source, which is what the screen
+     * path lost when GuiGraphics became an extract phase object writing into a gui render state.
+     * Full brightness, because an interaction hint that dims in a dark room is a hint nobody sees.
+     */
+    public void drawWorld(PoseStack pose, MultiBufferSource buffers, Vec3 proj, BlockHitResult rayTrace, VoxelShape shape) {
+        BlockPos blockPos = rayTrace.getBlockPos();
+        Vec3 hitVec = rayTrace.getLocation();
+        AABB boundingBox = shape.bounds();
+
+        activeAnimations.removeIf(keyframeAnimation -> !keyframeAnimation.isActive());
+        activeAnimations.forEach(KeyframeAnimation::preDraw);
+
+        int[] mouse = positionOnFace(pose,
+                blockPos.getX() - proj.x, blockPos.getY() - proj.y, blockPos.getZ() - proj.z,
+                hitVec.x - blockPos.getX(), hitVec.y - blockPos.getY(), hitVec.z - blockPos.getZ(),
+                rayTrace.getDirection(), boundingBox);
+
+        updateFocusState(0, 0, mouse[0], mouse[1]);
+        drawChildrenWorld(pose, buffers, 0, 0, 1, fullBright);
         pose.popPose();
     }
 }

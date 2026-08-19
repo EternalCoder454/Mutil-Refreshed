@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import se.mickelus.mutil.gui.animation.KeyframeAnimation;
 
@@ -50,6 +52,42 @@ public class GuiElement {
     public void draw(final GuiGraphicsExtractor graphics, int refX, int refY, int screenWidth, int screenHeight, int mouseX, int mouseY,
             float opacity) {
         drawChildren(graphics, refX + x, refY + y, screenWidth, screenHeight, mouseX, mouseY, opacity * this.opacity);
+    }
+
+    /**
+     * The same tree, drawn into the world instead of onto the screen.
+     *
+     * A GuiGraphicsExtractor writes into a GuiRenderState that the gui renderer later draws in
+     * screen space, so it cannot put anything on the side of a block. World space needs a pose and
+     * a buffer source, which is what a block outline renderer is handed, so this is a second draw
+     * path rather than a different graphics object.
+     *
+     * Only the leaves that the block overlay actually uses override it, which is GuiTexture and
+     * GuiString. Everything else is a container and inherits the recursion below.
+     */
+    public void drawWorld(final PoseStack pose, final MultiBufferSource buffers, int refX, int refY, float opacity, int light) {
+        drawChildrenWorld(pose, buffers, refX + x, refY + y, opacity * this.opacity, light);
+    }
+
+    /**
+     * Layout is decided the same way as on screen, by the same attachment offsets, so an element
+     * sits in the same place on a block face as it would in a menu.
+     */
+    protected void drawChildrenWorld(final PoseStack pose, final MultiBufferSource buffers, int refX, int refY, float opacity, int light) {
+        elements.removeIf(GuiElement::shouldRemove);
+
+        for (int i = 0; i < elements.size(); i++) {
+            GuiElement element = elements.get(i);
+            if (!element.isVisible()) {
+                continue;
+            }
+
+            element.updateAnimations();
+            element.drawWorld(pose, buffers,
+                    refX + getXOffset(this, element.attachmentAnchor) - getXOffset(element, element.attachmentPoint),
+                    refY + getYOffset(this, element.attachmentAnchor) - getYOffset(element, element.attachmentPoint),
+                    opacity, light);
+        }
     }
 
     public void updateAnimations() {
