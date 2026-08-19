@@ -47,6 +47,12 @@ Tetra's `mutil_version` names.
 constructor takes the gson, the namespace, the directory, the class to parse into, and a
 `DataDistributor` for syncing to clients.
 
+**One unparseable file no longer empties the store.** `parseData` used to collect every file in a
+single stream, so a parse failure threw out of the collect and left the store with nothing in it. A
+malformed improvement shipped by one Tetra addon meant every improvement in the game was missing,
+and the datapack reload died on the way into a world without naming the file. Each file is parsed on
+its own now, and a failure is logged with its name and dropped.
+
 `MergingDataStore` is the one to use when several mods contribute to the same logical set. Rather
 than the last file winning, entries with the same name are merged, which is how Tetra lets an addon
 extend a schematic it did not write. A file that sets `"replace": false` merges into what is already

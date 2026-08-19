@@ -157,13 +157,38 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
         parseData(splashList);
     }
 
+    /**
+     * Parse every file in this store, dropping any that cannot be read.
+     *
+     * <p>This used to collect the whole set in one stream, so a single unparseable file threw out
+     * of the collect and the store ended up with nothing in it. One malformed improvement shipped
+     * by one addon took every improvement in the game with it, and the datapack reload died on the
+     * way into a world rather than saying which file was at fault.
+     *
+     * <p>A file that fails now is logged with its name and the reason, and the rest still load.
+     * That is the behaviour the rest of this project already assumes: loud, and survivable.
+     */
     public void parseData(Map<Identifier, JsonElement> splashList) {
         logger.info("Loaded {} {}", String.format("%3d", splashList.values().size()), directory);
-        dataMap = splashList.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> gson.fromJson(entry.getValue(), dataClass)
-                ));
+
+        Map<Identifier, V> parsed = new HashMap<>();
+        List<Identifier> failed = new ArrayList<>();
+        for (Map.Entry<Identifier, JsonElement> entry : splashList.entrySet()) {
+            try {
+                parsed.put(entry.getKey(), gson.fromJson(entry.getValue(), dataClass));
+            } catch (RuntimeException e) {
+                failed.add(entry.getKey());
+                logger.error("Dropping '{}' from {}, it could not be parsed: {}",
+                        entry.getKey(), directory, e.getMessage());
+            }
+        }
+
+        if (!failed.isEmpty()) {
+            logger.error("{} of {} files in {} were dropped: {}", failed.size(),
+                    splashList.size(), directory, failed);
+        }
+
+        dataMap = parsed;
 
         processData();
 
