@@ -15,9 +15,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public abstract class MergingDataStore<V, U> extends DataStore<V> {
     private static final Logger logger = LogManager.getLogger();
@@ -76,26 +77,43 @@ public abstract class MergingDataStore<V, U> extends DataStore<V> {
 
     @Override
     public void loadFromPacket(Map<Identifier, String> data) {
-        Map<Identifier, JsonElement> splashList = data.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> GsonHelper.fromJson(gson, entry.getValue(), JsonArray.class)
-                ));
-
-        parseData(splashList);
+        parseData(readPacket(data, entry -> GsonHelper.fromJson(gson, entry, JsonArray.class)));
     }
 
+    /**
+      * Parse and merge every entry, dropping any that cannot be read.
+      *
+      * <p>This is the store behind modules, schematics, materials and crafting effects, which are
+      * the four an addon is most likely to extend and the four with the most files. It used to
+      * collect them in one stream, so one unreadable entry threw out of the collect and left the
+      * store empty, taking every module or every schematic in the game with it.
+      */
+    @Override
     public void parseData(Map<Identifier, JsonElement> splashList) {
         logger.info("Loaded {} {}", String.format("%3d", splashList.values().size()), directory);
-        dataMap = splashList.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> mergeData(gson.fromJson(entry.getValue(), arrayClass))
-                ));
+
+        Map<Identifier, V> parsed = new HashMap<>();
+        List<Identifier> failed = new ArrayList<>();
+        for (Map.Entry<Identifier, JsonElement> entry : splashList.entrySet()) {
+            try {
+                parsed.put(entry.getKey(), mergeData(gson.fromJson(entry.getValue(), arrayClass)));
+            } catch (RuntimeException e) {
+                failed.add(entry.getKey());
+                logger.error("Dropping '{}' from {}, it could not be parsed: {}",
+                        entry.getKey(), directory, e.getMessage());
+            }
+        }
+
+        if (!failed.isEmpty()) {
+            logger.error("{} of {} files in {} were dropped: {}", failed.size(),
+                    splashList.size(), directory, failed);
+        }
+
+        dataMap = parsed;
 
         processData();
 
-        listeners.forEach(Runnable::run);
+        notifyListeners();
     }
 
     protected abstract V mergeData(U collection);

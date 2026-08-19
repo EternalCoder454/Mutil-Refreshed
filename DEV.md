@@ -47,11 +47,56 @@ Tetra's `mutil_version` names.
 constructor takes the gson, the namespace, the directory, the class to parse into, and a
 `DataDistributor` for syncing to clients.
 
+## What is still owed
+
+**`IItemHandler` is deprecated and marked for removal**, in favour of
+`ResourceHandler<ItemResource>` in `net.neoforged.neoforge.transfer`. Thirteen uses here, all in
+`util/ItemHandlerWrapper` and `gui/impl/ToggleableSlot`, and five files in Tetra touch those. It
+still compiles and still works, and it has a deadline that is not this version. `IItemHandler.of`
+adapts a resource handler, so the migration can be taken from either end. This is the only piece of
+the foundation with an expiry date on it.
+
+**Three `this-escape` warnings**, in `GuiButton`, `GuiItem` and `GuiText`. Each calls an
+overridable method from its own constructor, so a subclass sees itself half built. Nothing subclasses
+those three today, which is why it has never bitten.
+
+**`getDataIn` scans the whole store per call.** Seven call sites in Tetra, none per frame, so it
+has not mattered. It would matter if one moved into a loop.
+
+## Surviving bad input
+
+Everything below is the same shape: mutil does work for another mod, that work throws, and the
+failure escapes into a reload or a tick loop and takes far more with it than the thing that was
+wrong.
+
 **One unparseable file no longer empties the store.** `parseData` used to collect every file in a
 single stream, so a parse failure threw out of the collect and left the store with nothing in it. A
 malformed improvement shipped by one Tetra addon meant every improvement in the game was missing,
 and the datapack reload died on the way into a world without naming the file. Each file is parsed on
 its own now, and a failure is logged with its name and dropped.
+
+**`MergingDataStore` overrides `parseData` and needed the same guard separately.** It is the base
+for modules, schematics, materials and crafting effects, which are the four stores an addon is most
+likely to extend and the four with the most files, so it was the half that mattered more.
+
+**A synced store is guarded too.** `loadFromPacket` had the same unguarded collect on the path a
+client takes when a server sends it a store, where the symptom would have been a client missing
+content the server has.
+
+**A reload listener that throws no longer stops the ones after it.** They ran in a `forEach`, so the
+first failure ended the reload, and a fault in one feature took out features unrelated to it.
+
+**A duplicate id is a warning rather than a throw.** It threw `IllegalStateException`, which the
+catch below it does not name, so it escaped `prepare` and killed the whole store rather than the
+one file.
+
+**A scheduled task that throws is dropped rather than retried forever.** The queue removed a task
+after running it, so one that threw was never removed and threw again on every tick after that.
+
+**`getSources` is cached per pack.** It streamed every mod file in the pack once per resource read,
+to answer a question whose answer only depends on which pack the file came from. With Tetra's
+thousand or so data files, twice per load for client and server, that was a lot of passes over the
+same list.
 
 `MergingDataStore` is the one to use when several mods contribute to the same logical set. Rather
 than the last file winning, entries with the same name are merged, which is how Tetra lets an addon

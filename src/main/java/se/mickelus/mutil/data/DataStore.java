@@ -92,7 +92,8 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
                     if (shouldLoad(json)) {
                         JsonElement duplicate = map.put(location, json);
                         if (duplicate != null) {
-                            throw new IllegalStateException("Duplicate data ignored with ID " + location);
+                            logger.warn("Two files in {} both claim '{}', the later one wins",
+                                    directory, location);
                         }
                     } else {
                         logger.debug("Skipping data '{}' due to condition", entry.getKey());
@@ -108,8 +109,13 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
         return map;
     }
 
+    private final Map<String, JsonArray> sourceCache = new HashMap<>();
+
     protected JsonArray getSources(Resource resource) {
-        String fileId = resource.sourcePackId();
+        return sourceCache.computeIfAbsent(resource.sourcePackId(), this::readSources);
+    }
+
+    private JsonArray readSources(String fileId) {
         JsonArray result = new JsonArray();
 
         ModList.get().getModFiles().stream()
@@ -142,19 +148,9 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
     }
 
     public void loadFromPacket(Map<Identifier, String> data) {
-        Map<Identifier, JsonElement> splashList = data.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> {
-                            if (dataClass.isArray()) {
-                                return GsonHelper.fromJson(gson, entry.getValue(), JsonArray.class);
-                            } else {
-                                return GsonHelper.fromJson(gson, entry.getValue(), JsonElement.class);
-                            }
-                        }
-                ));
-
-        parseData(splashList);
+        parseData(readPacket(data, entry -> dataClass.isArray()
+                ? GsonHelper.fromJson(gson, entry, JsonArray.class)
+                : GsonHelper.fromJson(gson, entry, JsonElement.class)));
     }
 
     /**
@@ -192,7 +188,45 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<Identifier,
 
         processData();
 
-        listeners.forEach(Runnable::run);
+        notifyListeners();
+    }
+
+    /**
+     * Run every reload listener, and keep going when one throws.
+     *
+     * <p>Tetra registers these from all over, and they run at the end of a datapack reload. One of
+     * them failing used to stop every listener after it and escape into the reload, so a fault in
+     * one feature took out features that had nothing to do with it.
+     */
+    protected void notifyListeners() {
+        for (Runnable listener : listeners) {
+            try {
+                listener.run();
+            } catch (RuntimeException e) {
+                logger.error("A reload listener for {} threw, the rest still ran", directory, e);
+            }
+        }
+    }
+
+    /**
+     * {@return the entries of a synced packet that could be read}
+     *
+     * <p>A client takes this path when a server sends it a store. It used to collect in one stream,
+     * so one unreadable entry emptied the store on the client while the server had it fine, which
+     * is a desync that looks like a missing feature rather than like a parse error.
+     */
+    protected Map<Identifier, JsonElement> readPacket(Map<Identifier, String> data,
+            java.util.function.Function<String, JsonElement> reader) {
+        Map<Identifier, JsonElement> result = new HashMap<>();
+        for (Map.Entry<Identifier, String> entry : data.entrySet()) {
+            try {
+                result.put(entry.getKey(), reader.apply(entry.getValue()));
+            } catch (RuntimeException e) {
+                logger.error("Dropping synced '{}' for {}, it could not be read: {}",
+                        entry.getKey(), directory, e.getMessage());
+            }
+        }
+        return result;
     }
 
     protected boolean shouldLoad(JsonElement json) {
