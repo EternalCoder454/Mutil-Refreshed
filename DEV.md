@@ -179,4 +179,4 @@ Work through [PLAYTESTING.md](PLAYTESTING.md) before calling a build good.
    upstream branch rather than copying files across.
 6. Fixes that belong in mutil go in mutil, not around it in the consumer. Several have already come
    up that way, and each was invisible until Tetra became the first real consumer.
-7. No em dash, no double hyphen in prose, no semicolon, in any document here.
+7. No em dash and no double hyphen in prose, in any document here. Semicolons are fine, sparingly.
