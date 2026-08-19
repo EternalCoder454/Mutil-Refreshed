@@ -54,4 +54,4 @@ to take future changes, not copying files.
 | [DEV.md](DEV.md) | building, publishing, and what each of the five packages gives a consumer |
 | [PORT-STATUS.md](PORT-STATUS.md) | the 1.21.1 to 26.1.2 port, and the one behaviour risk that never surfaces as a compile error |
 | [CHANGELOG.md](CHANGELOG.md) | what changed, per release |
-| [PLAYTESTING.md](PLAYTESTING.md) | what to check before calling a build good |
+| [PLAYTESTING.md](PLAYTESTING.md) | a checklist for testing a build |
