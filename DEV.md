@@ -179,4 +179,4 @@ Work through [PLAYTESTING.md](PLAYTESTING.md) before calling a build good.
    upstream branch rather than copying files across.
 6. Fixes that belong in mutil go in mutil, not around it in the consumer. Several have already come
    up that way, and each was invisible until Tetra became the first real consumer.
-7. Writing rules: run `python tools/check-writing-rules.py --rules`. Nothing else states them.
+7. Writing rules: run `check-writing-rules.py --rules` from [mc-tools](https://github.com/EternalCoder454/mc-tools), checked out at `Minecraft/tools`. Nothing else states them.
