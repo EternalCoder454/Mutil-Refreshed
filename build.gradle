@@ -85,6 +85,14 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    // Minecraft's registries have to exist before most of this library means anything. An ItemStack
+    // is not a value you can build in a bare JVM, and the item handler wrapper is the thing here
+    // most worth a test, so the tests run against a bootstrapped game rather than mocks of it.
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 configurations {
@@ -92,6 +100,9 @@ configurations {
 }
 
 dependencies {
+    testImplementation platform("org.junit:junit-bom:5.11.3")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -169,6 +180,14 @@ tasks.named('jar') {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    testLogging {
+        events 'failed'
+        exceptionFormat 'full'
+    }
 }
 
 idea {
