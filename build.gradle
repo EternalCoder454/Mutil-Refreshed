@@ -74,10 +74,16 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        data {
-            data()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
+        // No data run. The old one called ModDevGradle 1.x's data() helper, and the "data" run
+        // type it asks for died with the client/server jar split, so runData failed at
+        // :prepareDataRun. Deleted rather than split, because mutil registers no GatherDataEvent
+        // listener and ships no providers. The run had nothing to generate.
+        //
+        // Adding providers later means restoring this as separate clientData and serverData runs,
+        // and registering every provider on both GatherDataEvent.Client and GatherDataEvent.Server
+        // with generator.addProvider(shouldRun, provider). The two runs share one output
+        // directory, and HashCache deletes every file in it that the running generator cannot
+        // account for, so each run wipes the other's output unless both know all the providers.
     }
 
     mods {
