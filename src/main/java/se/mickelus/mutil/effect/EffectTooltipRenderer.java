@@ -6,8 +6,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions;
 
 import java.util.function.Function;
@@ -20,7 +18,6 @@ public class EffectTooltipRenderer implements IClientMobEffectExtensions {
         this.constructEffectTooltip = constructEffectTooltip;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void renderInventoryEffectTooltip(GuiGraphicsExtractor graphics, int x, int y, Supplier<Component> tooltip) {
         Minecraft mc = Minecraft.getInstance();
         Window window = mc.getWindow();

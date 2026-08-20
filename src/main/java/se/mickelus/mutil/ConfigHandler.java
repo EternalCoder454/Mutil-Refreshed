@@ -2,7 +2,6 @@ package se.mickelus.mutil;
 
 
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -22,14 +21,12 @@ class ConfigHandler {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     private static void setupClient() {
         final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         client = new Client(builder);
         clientSpec = builder.build();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class Client {
         public ModConfigSpec.BooleanValue queryPerks;
 

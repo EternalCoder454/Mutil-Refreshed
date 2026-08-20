@@ -14,7 +14,6 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  * registered. Keeping the client lookup in a client only class is what @OnlyIn was being asked to
  * do and cannot.
  */
-@OnlyIn(Dist.CLIENT)
 public class ClientPacketSender {
     private ClientPacketSender() {
     }
